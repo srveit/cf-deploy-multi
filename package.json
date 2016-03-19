@@ -1,0 +1,25 @@
+{
+  "name": "cf-deploy-multi",
+  "version": "1.0.0",
+  "description": "Deploy to multiple cloud coundries",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/srveit/cf-deploy-multi.git"
+  },
+  "keywords": [
+    "cloud",
+    "foundry",
+    "deploy"
+  ],
+  "author": "Stephen R. Veit <srveit@veitconsulting.com> (http://stephenveit.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/srveit/cf-deploy-multi/issues"
+  },
+  "homepage": "https://github.com/srveit/cf-deploy-multi#readme",
+  "devDependencies": {}
+}
