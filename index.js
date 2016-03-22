@@ -2,7 +2,8 @@
 var childProcess = require('child_process'),
   path = require('path');
 
-function createDeployer(foundries, environments, environmentName, timestamp) {
+function createDeployer(projectRoot, foundries, environments, environmentName,
+                        timestamp) {
   timestamp = timestamp || Math.ceil(new Date().valueOf() / 1000);
 
   function getEnvironment() {
@@ -14,7 +15,7 @@ function createDeployer(foundries, environments, environmentName, timestamp) {
       environment = getEnvironment(),
       newAppName = environment.newAppName,
       oldAppName,
-      cfCmd = process.env.CF_CMD || 'node_modules/.bin/cf';
+      cfCmd = process.env.CF_CMD || path.resolve(__dirname, 'bin/cf');
 
     function cf() {
       var args = Array.prototype.slice.call(arguments, 0),
@@ -30,7 +31,7 @@ function createDeployer(foundries, environments, environmentName, timestamp) {
           stdio = [process.stdin, 'pipe', process.stderr],
           p;
         p = childProcess.spawn(cfCmd, args, {
-          cwd: path.resolve(__dirname, '..'),
+          cwd: projectRoot,
           env: {
             CF_HOME: foundry.home,
             CF_COLOR: 'false'

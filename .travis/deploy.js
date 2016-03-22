@@ -6,6 +6,7 @@ var BASE_NAME = 'my-project',
   path = require('path'),
   cfDeployMulti = require('cf-deploy-multi'),
   travisCommit = process.env.TRAVIS_COMMIT.substr(0, 6),
+  projectRoot = path.resolve(__dirname, '..'),
   deployer,
   timestamp,
   environmentName,
@@ -118,7 +119,7 @@ environments = {
   }
 };
 
-deployer = cfDeployMulti.createDeployer(foundries, environments,
+deployer = cfDeployMulti.createDeployer(projectRoot, foundries, environments,
                                         environmentName, timestamp);
 
 deployer.deployApps();
