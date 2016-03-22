@@ -1,6 +1,7 @@
 'use strict';
 var BASE_NAME = 'my-project',
   ROOT_DOMAIN = 'example.com',
+  BUILD_PACK = 'https://github.com/cloudfoundry/nodejs-buildpack.git#v1.5.4',
   os = require('os'),
   path = require('path'),
   cfDeployMulti = require('cf-deploy-multi'),
@@ -68,7 +69,9 @@ environments = {
     locations: [
       'appfog-east'
     ],
-    instances: 1,
+    buildPack: BUILD_PACK,
+    startCommand: 'node app.js production',
+    instances: 2,
     memory: '512M',
     disk: '512M',
     services: []
@@ -86,7 +89,9 @@ environments = {
     locations: [
       'appfog-east'
     ],
-    instances: 1,
+    buildPack: BUILD_PACK,
+    startCommand: 'node app.js staging',
+    instances: 2,
     memory: '512M',
     disk: '512M',
     services: []
@@ -104,6 +109,8 @@ environments = {
     locations: [
       'appfog-east'
     ],
+    buildPack: BUILD_PACK,
+    startCommand: 'node app.js staging',
     instances: 1,
     memory: '512M',
     disk: '512M',
