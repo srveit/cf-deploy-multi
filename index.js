@@ -149,7 +149,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     function getAppName(domain, endpoint) {
       return cf('apps')
         .then(function (results) {
-          var appPattern = new RegExp(endpoint + '.' + domain);
+          var appPattern = new RegExp(' ' + endpoint + '\\.' + domain);
           return results
             .split('\n')
             .filter(function (line) {
@@ -184,6 +184,10 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
             return true;
           }
           return cf.apply(foundry, unmapArgs);
+        })
+        .catch(function (error) {
+          console.error('error mapping route:', error);
+          return Promise.reject(error);
         });
     }
     function pushNewApp() {
@@ -286,9 +290,11 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
       .then(bindServicesToApps)
       .then(remapNewAppsAndDeleteOldApps)
       .catch(function () {
-        deleteApps();
-        console.error('deploy failed');
-        process.exit(1);
+        deleteApps()
+          .then(function () {
+            console.error('deploy failed');
+            process.exit(1);
+          });
       });
   }
   return {
