@@ -60,6 +60,15 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     function setApi() {
       return cf('api', foundry.api);
     }
+    function installDiego() {
+      return cf('install-plugin', 'Diego-Enabler', '-r', 'CF-Community', '-f')
+        .catch(function (error) {
+          console.log('ignoring install-plugin error', error);
+        });
+    }
+    function enableDiego() {
+      return cf('enable-diego', newAppName);
+    }
     function logout() {
       return cf('logout');
     }
@@ -167,7 +176,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
       ])
         .then(function (appNames) {
           oldAppName = appNames.filter(function (appName) {
-            return appName;
+            return appName && appName !== newAppName;
           })[0];
         });
     }
@@ -195,6 +204,8 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
         .then(setApi)
         .then(login)
         .then(pushApp)
+        .then(installDiego)
+        .then(enableDiego)
         .then(setAppEnvironment)
         .then(startApp)
         .then(checkAppState)
@@ -297,6 +308,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
           });
       });
   }
+
   return {
     deployApps: deployApps
   };
