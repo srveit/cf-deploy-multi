@@ -241,18 +241,18 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
 
       return Promise.all(mappings);
     }
-    function remapNewAppAndDeleteOldApp() {
+    function remapNewApp() {
       return setOldAppName()
-        .then(mapNewAppsAndUnmapOldApps)
-        .then(deleteOldApp);
+        .then(mapNewAppsAndUnmapOldApps);
     }
     function bindServicesToApp() {
       return Promise.all(environment.services.map(bindServiceToApp));
     }
     foundry.pushNewApp = pushNewApp;
     foundry.deleteNewApp = deleteNewApp;
+    foundry.deleteOldApp = deleteOldApp;
     foundry.bindServicesToApp = bindServicesToApp;
-    foundry.remapNewAppAndDeleteOldApp = remapNewAppAndDeleteOldApp;
+    foundry.remapNewApp = remapNewApp;
     return foundry;
   }
 
@@ -266,14 +266,19 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     return foundry.deleteNewApp();
   }
 
+  function deleteOldApp(location) {
+    var foundry = newFoundry(location);
+    return foundry.deleteOldApp();
+  }
+
   function bindServicesToApp(location) {
     var foundry = newFoundry(location);
     return foundry.bindServicesToApp();
   }
 
-  function remapNewAppAndDeleteOldApp(location) {
+  function remapNewApp(location) {
     var foundry = newFoundry(location);
-    return foundry.remapNewAppAndDeleteOldApp();
+    return foundry.remapNewApp();
   }
 
   function eachLocation(fn) {
@@ -288,20 +293,28 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     return eachLocation(bindServicesToApp);
   }
 
-  function remapNewAppsAndDeleteOldApps() {
-    return eachLocation(remapNewAppAndDeleteOldApp);
+  function remapNewApps() {
+    return eachLocation(remapNewApp);
   }
 
-  function deleteApps() {
+  function deleteNewApps() {
     return eachLocation(deleteNewApp);
+  }
+
+  function deleteOldApps() {
+    return eachLocation(deleteOldApp)
+      .catch(function (error) {
+        console.log('error deleting old apps', error);
+      });
   }
 
   function deployApps() {
     pushNewApps()
       .then(bindServicesToApps)
-      .then(remapNewAppsAndDeleteOldApps)
+      .then(remapNewApps)
+      .then(deleteOldApps)
       .catch(function () {
-        deleteApps()
+        deleteNewApps()
           .then(function () {
             console.error('deploy failed');
             process.exit(1);
