@@ -273,6 +273,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     foundry.bindServicesToApp = bindServicesToApp;
     foundry.mapNewApps = mapNewApps;
     foundry.unmapOldApps = unmapOldApps;
+    foundry.setOldAppName = setOldAppName;
     return foundry;
   }
 
@@ -349,7 +350,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
       .catch(function (error) {
         deleteNewApps()
           .then(function () {
-            console.error('deploy failed', error);
+            console.error('deploy failed', error, error.stack);
             process.exit(1);
           });
       });
