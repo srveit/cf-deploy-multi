@@ -60,6 +60,12 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     function setApi() {
       return cf('api', foundry.api);
     }
+    function addCommunityRepo() {
+      return cf('add-plugin-repo', 'CF-Community', 'http://plugins.cloudfoundry.org/')
+        .catch(function (error) {
+          console.log('ignoring add-plugin-repo', error);
+        });
+    }
     function installDiego() {
       return cf('install-plugin', 'Diego-Enabler', '-r', 'CF-Community', '-f')
         .catch(function (error) {
@@ -68,6 +74,9 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     }
     function enableDiego() {
       return cf('enable-diego', newAppName);
+    }
+    function cfVersion() {
+      return cf('-v');
     }
     function logout() {
       return cf('logout');
@@ -207,10 +216,12 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
         });
     }
     function pushNewApp() {
-      return logout()
+      return cfVersion()
+        .then(logout)
         .then(setApi)
         .then(login)
         .then(pushApp)
+        .then(addCommunityRepo)
         .then(installDiego)
         .then(enableDiego)
         .then(setAppEnvironment)
