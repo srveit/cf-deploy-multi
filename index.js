@@ -346,10 +346,10 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
       .then(remapNewApps)
       .then(unmapOldApps)
       .then(deleteOldApps)
-      .catch(function () {
+      .catch(function (error) {
         deleteNewApps()
           .then(function () {
-            console.error('deploy failed');
+            console.error('deploy failed', error);
             process.exit(1);
           });
       });
