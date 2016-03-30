@@ -1,6 +1,6 @@
 {
   "name": "cf-deploy-multi",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "description": "Deploy to multiple cloud coundries",
   "main": "index.js",
   "scripts": {
