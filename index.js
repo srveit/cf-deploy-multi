@@ -4,7 +4,7 @@ var childProcess = require('child_process'),
 
 function createDeployer(projectRoot, foundries, environments, environmentName,
                         timestamp) {
-  var foundries;
+  var foundries = {};
 
   timestamp = timestamp || Math.ceil(new Date().valueOf() / 1000);
 

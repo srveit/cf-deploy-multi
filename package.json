@@ -1,6 +1,6 @@
 {
   "name": "cf-deploy-multi",
-  "version": "2.1.9",
+  "version": "2.1.10",
   "description": "Deploy to multiple cloud foundries",
   "main": "index.js",
   "scripts": {
