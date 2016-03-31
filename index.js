@@ -3,7 +3,7 @@ var childProcess = require('child_process'),
   path = require('path');
 
 Promise.series = function(promiseFunctions) {
-  results = [];
+  var results = [];
   return promiseFunctions.reduce(function (cur, next) {
     return cur
       .then(function(result) {
