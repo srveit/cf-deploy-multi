@@ -73,7 +73,10 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
         });
     }
     function enableDiego() {
-      return cf('enable-diego', newAppName);
+      return cf('enable-diego', newAppName)
+        .catch(function (error) {
+          console.log('ignoring enable-diego error', error);
+        });
     }
     function cfVersion() {
       return cf('-v');
