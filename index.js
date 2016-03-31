@@ -257,14 +257,14 @@ function createDeployer(projectRoot, foundrySpecs, environments,
       if (environment.baseDomain === 'ctl.io') {
         // the ctl.io domain does not exist in AppFog
         mappings.push(
-          mapNewApp.bind(undefined, environment.baseName + '.' + environment.baseDomain));
+          mapNewApp.bind(undefined, environment.baseName + '.' + environment.baseDomain, undefined));
       } else {
         mappings.push(
           mapNewApp.bind(undefined, environment.baseDomain, environment.baseName));
       }
       mappings =
         mappings.concat(environment.custom_domains.map(function (domain) {
-          return mapNewApp.bind(undefined, domain);
+          return mapNewApp.bind(undefined, domain, undefined);
         }));
 
       return Promise.series(mappings);
