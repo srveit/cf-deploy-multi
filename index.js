@@ -6,11 +6,11 @@ Promise.series = function(promiseFunctions) {
   var results = [];
   return promiseFunctions.reduce(function (cur, next) {
     return cur
+      .then(next)
       .then(function(result) {
         results.push(result);
         return result;
-      })
-      .then(next);
+      });
   }, Promise.resolve())
     .then(function () {
       return results;
@@ -282,7 +282,7 @@ function createDeployer(projectRoot, foundrySpecs, environments,
       mapNewApps: mapNewApps,
       setOldAppName: setOldAppName,
       spec: foundrySpec
-    }
+    };
   }
 
   function getFoundry(location) {
