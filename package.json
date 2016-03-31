@@ -1,7 +1,7 @@
 {
   "name": "cf-deploy-multi",
   "version": "2.1.6",
-  "description": "Deploy to multiple cloud coundries",
+  "description": "Deploy to multiple cloud foundries",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
