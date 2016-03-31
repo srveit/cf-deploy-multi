@@ -2,8 +2,8 @@
 var childProcess = require('child_process'),
   path = require('path');
 
-function createDeployer(projectRoot, foundries, environments, environmentName,
-                        timestamp) {
+function createDeployer(projectRoot, foundrySpecs, environments,
+                        environmentName, timestamp) {
   var foundries = {};
 
   timestamp = timestamp || Math.ceil(new Date().valueOf() / 1000);
@@ -13,7 +13,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
   }
 
   function newFoundry(location) {
-    var foundry = foundries[location],
+    var foundrySpec = foundrySpecs[location],
       environment = getEnvironment(),
       newAppName = environment.newAppName,
       oldAppName,
@@ -35,7 +35,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
         p = childProcess.spawn(cfCmd, args, {
           cwd: projectRoot,
           env: {
-            CF_HOME: foundry.home,
+            CF_HOME: foundrySpec.home,
             CF_COLOR: 'false'
           },
           stdio: stdio
@@ -60,7 +60,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
       });
     }
     function setApi() {
-      return cf('api', foundry.api);
+      return cf('api', foundrySpec.api);
     }
     function addCommunityRepo() {
       return cf('add-plugin-repo', 'CF-Community', 'http://plugins.cloudfoundry.org/')
@@ -87,9 +87,9 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
       return cf('logout');
     }
     function login() {
-      var space = foundry.spaces[environment.appEnv.NODE_ENV];
-      return cf('login', '--u', foundry.username, '--p', foundry.password,
-                '--o', foundry.org, '--s', space);
+      var space = foundrySpec.spaces[environment.appEnv.NODE_ENV];
+      return cf('login', '--u', foundrySpec.username, '--p', foundrySpec.password,
+                '--o', foundrySpec.org, '--s', space);
     }
     function logApp() {
       return cf('logs', newAppName, '--recent')
@@ -185,7 +185,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     }
     function setOldAppName() {
       return Promise.all([
-        getAppName(foundry.domain, environment.endpoint),
+        getAppName(foundrySpec.domain, environment.endpoint),
         getAppName(environment.baseDomain, environment.baseName)
       ])
         .then(function (appNames) {
@@ -202,7 +202,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
       if (endpoint) {
         mapArgs.push('-n', endpoint);
       }
-      return cf.apply(foundry, mapArgs)
+      return cf.apply(foundrySpec, mapArgs)
         .catch(function (error) {
           console.error('error mapping app:', newAppName,
                         'domain:', domain, 'error:', error);
@@ -239,7 +239,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     }
     function mapNewApps() {
       var mappings = [
-        mapNewApp(foundry.domain, environment.endpoint),
+        mapNewApp(foundrySpec.domain, environment.endpoint),
       ];
       if (environment.baseDomain === 'ctl.io') {
         // the ctl.io domain does not exist in AppFog
@@ -256,13 +256,15 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     function bindServicesToApp() {
       return Promise.all(environment.services.map(bindServiceToApp));
     }
-    foundry.pushNewApp = pushNewApp;
-    foundry.deleteNewApp = deleteNewApp;
-    foundry.deleteOldApp = deleteOldApp;
-    foundry.bindServicesToApp = bindServicesToApp;
-    foundry.mapNewApps = mapNewApps;
-    foundry.setOldAppName = setOldAppName;
-    return foundry;
+    return {
+      pushNewApp: pushNewApp,
+      deleteNewApp: deleteNewApp,
+      deleteOldApp: deleteOldApp,
+      bindServicesToApp: bindServicesToApp,
+      mapNewApps: mapNewApps,
+      setOldAppName: setOldAppName,
+      spec: foundrySpec
+    }
   }
 
   function getFoundry(location) {
