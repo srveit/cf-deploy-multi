@@ -209,20 +209,6 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
           return Promise.reject(error);
         });
     }
-    function unmapOldApp(domain, endpoint) {
-      var unmapArgs = ['unmap-route', oldAppName, domain];
-      if (endpoint) {
-        unmapArgs.push('-n', endpoint);
-      }
-      if (!oldAppName) {
-        return Promise.resolve(true);
-      }
-      return cf.apply(foundry, unmapArgs)
-        .catch(function (error) {
-          console.error('error unmapping app:', oldAppName,
-                        'domain:', domain, 'error:', error);
-        });
-    }
     function pushNewApp() {
       return cfVersion()
         .then(logout)
@@ -267,22 +253,6 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
 
       return Promise.all(mappings);
     }
-    function unmapOldApps() {
-      var mappings = [
-        unmapOldApp(foundry.domain, environment.endpoint),
-      ];
-      if (environment.baseDomain === 'ctl.io') {
-        // the ctl.io domain does not exist in AppFog
-        mappings.push(
-          unmapOldApp(environment.baseName + '.' + environment.baseDomain));
-      } else {
-        mappings.push(unmapOldApp(environment.baseDomain, environment.baseName));
-      }
-      mappings =
-        mappings.concat(environment.custom_domains.map(unmapOldApp));
-
-      return Promise.all(mappings);
-    }
     function bindServicesToApp() {
       return Promise.all(environment.services.map(bindServiceToApp));
     }
@@ -291,7 +261,6 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     foundry.deleteOldApp = deleteOldApp;
     foundry.bindServicesToApp = bindServicesToApp;
     foundry.mapNewApps = mapNewApps;
-    foundry.unmapOldApps = unmapOldApps;
     foundry.setOldAppName = setOldAppName;
     return foundry;
   }
@@ -331,11 +300,6 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
       });
   }
 
-  function unmapOldApp(location) {
-    var foundry = getFoundry(location);
-    return foundry.unmapOldApps();
-  }
-
   function eachLocation(fn) {
     var environment = getEnvironment();
     return Promise.all(environment.locations.map(fn));
@@ -350,10 +314,6 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
 
   function remapNewApps() {
     return eachLocation(remapNewApp);
-  }
-
-  function unmapOldApps() {
-    return eachLocation(unmapOldApp);
   }
 
   function deleteNewApps() {
@@ -371,7 +331,6 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     pushNewApps()
       .then(bindServicesToApps)
       .then(remapNewApps)
-      .then(unmapOldApps)
       .then(deleteOldApps)
       .catch(function (error) {
         deleteNewApps()
