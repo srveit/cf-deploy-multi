@@ -2,6 +2,21 @@
 var childProcess = require('child_process'),
   path = require('path');
 
+Promise.series = function(promiseFunctions) {
+  results = [];
+  return promiseFunctions.reduce(function (cur, next) {
+    return cur
+      .then(function(result) {
+        results.push(result);
+        return result;
+      })
+      .then(next);
+  }, Promise.resolve())
+    .then(function () {
+      return results;
+    });
+};
+
 function createDeployer(projectRoot, foundrySpecs, environments,
                         environmentName, timestamp) {
   var foundries = {};
@@ -133,9 +148,7 @@ function createDeployer(projectRoot, foundrySpecs, environments,
       settings.push(function () {
         return cf('set-env', newAppName, "FOUNDRY_LOCATION", location);
       });
-      return settings.reduce(function (cur, next) {
-        return cur.then(next);
-      }, Promise.resolve());
+      return Promise.series(settings);
     }
     function bindServiceToApp(serviceName) {
       return cf('bind-service', newAppName, serviceName);
@@ -184,9 +197,9 @@ function createDeployer(projectRoot, foundrySpecs, environments,
         });
     }
     function setOldAppName() {
-      return Promise.all([
-        getAppName(foundrySpec.domain, environment.endpoint),
-        getAppName(environment.baseDomain, environment.baseName)
+      return Promise.series([
+        getAppName.bind(undefined, foundrySpec.domain, environment.endpoint),
+        getAppName.bind(undefined, environment.baseDomain, environment.baseName)
       ])
         .then(function (appNames) {
           console.log('appNames', appNames);
@@ -239,22 +252,27 @@ function createDeployer(projectRoot, foundrySpecs, environments,
     }
     function mapNewApps() {
       var mappings = [
-        mapNewApp(foundrySpec.domain, environment.endpoint),
+        mapNewApp.bind(endefined, foundrySpec.domain, environment.endpoint)
       ];
       if (environment.baseDomain === 'ctl.io') {
         // the ctl.io domain does not exist in AppFog
         mappings.push(
-          mapNewApp(environment.baseName + '.' + environment.baseDomain));
+          mapNewApp.bind(endefined, environment.baseName + '.' + environment.baseDomain));
       } else {
-        mappings.push(mapNewApp(environment.baseDomain, environment.baseName));
+        mappings.push(
+          mapNewApp.bind(endefined, environment.baseDomain, environment.baseName));
       }
       mappings =
-        mappings.concat(environment.custom_domains.map(mapNewApp));
+        mappings.concat(environment.custom_domains.map(function (domain) {
+          return mapNewApp.bind(endefined, domain);
+        }));
 
-      return Promise.all(mappings);
+      return Promise.series(mappings);
     }
     function bindServicesToApp() {
-      return Promise.all(environment.services.map(bindServiceToApp));
+      return Promise.series(environment.services.map(function (service) {
+        return bindServiceToApp.bind(endefined, service);
+      }));
     }
     return {
       pushNewApp: pushNewApp,
