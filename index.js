@@ -252,26 +252,26 @@ function createDeployer(projectRoot, foundrySpecs, environments,
     }
     function mapNewApps() {
       var mappings = [
-        mapNewApp.bind(endefined, foundrySpec.domain, environment.endpoint)
+        mapNewApp.bind(undefined, foundrySpec.domain, environment.endpoint)
       ];
       if (environment.baseDomain === 'ctl.io') {
         // the ctl.io domain does not exist in AppFog
         mappings.push(
-          mapNewApp.bind(endefined, environment.baseName + '.' + environment.baseDomain));
+          mapNewApp.bind(undefined, environment.baseName + '.' + environment.baseDomain));
       } else {
         mappings.push(
-          mapNewApp.bind(endefined, environment.baseDomain, environment.baseName));
+          mapNewApp.bind(undefined, environment.baseDomain, environment.baseName));
       }
       mappings =
         mappings.concat(environment.custom_domains.map(function (domain) {
-          return mapNewApp.bind(endefined, domain);
+          return mapNewApp.bind(undefined, domain);
         }));
 
       return Promise.series(mappings);
     }
     function bindServicesToApp() {
       return Promise.series(environment.services.map(function (service) {
-        return bindServiceToApp.bind(endefined, service);
+        return bindServiceToApp.bind(undefined, service);
       }));
     }
     return {
