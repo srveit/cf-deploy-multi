@@ -190,6 +190,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
           oldAppName = appNames.filter(function (appName) {
             return appName && appName !== newAppName;
           })[0];
+          return oldAppName;
         });
     }
     function mapNewApp(domain, endpoint) {
@@ -315,7 +316,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     var foundry = newFoundry(location);
     return foundry.setOldAppName()
       .then(function () {
-        foundry.mapNewApps();
+        return foundry.mapNewApps();
       });
   }
 
