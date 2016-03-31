@@ -4,6 +4,8 @@ var childProcess = require('child_process'),
 
 function createDeployer(projectRoot, foundries, environments, environmentName,
                         timestamp) {
+  var foundries;
+
   timestamp = timestamp || Math.ceil(new Date().valueOf() / 1000);
 
   function getEnvironment() {
@@ -187,9 +189,11 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
         getAppName(environment.baseDomain, environment.baseName)
       ])
         .then(function (appNames) {
+          console.log('appNames', appNames);
           oldAppName = appNames.filter(function (appName) {
             return appName && appName !== newAppName;
           })[0];
+          console.log('set old app name', oldAppName);
           return oldAppName;
         });
     }
@@ -292,28 +296,35 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
     return foundry;
   }
 
+  function getFoundry(location) {
+    if (!foundries[location]) {
+      foundries[location] = newFoundry(location);
+    }
+    return foundries[location];
+  }
+
   function pushNewApp(location) {
-    var foundry = newFoundry(location);
+    var foundry = getFoundry(location);
     return foundry.pushNewApp();
   }
 
   function deleteNewApp(location) {
-    var foundry = newFoundry(location);
+    var foundry = getFoundry(location);
     return foundry.deleteNewApp();
   }
 
   function deleteOldApp(location) {
-    var foundry = newFoundry(location);
+    var foundry = getFoundry(location);
     return foundry.deleteOldApp();
   }
 
   function bindServicesToApp(location) {
-    var foundry = newFoundry(location);
+    var foundry = getFoundry(location);
     return foundry.bindServicesToApp();
   }
 
   function remapNewApp(location) {
-    var foundry = newFoundry(location);
+    var foundry = getFoundry(location);
     return foundry.setOldAppName()
       .then(function () {
         return foundry.mapNewApps();
@@ -321,7 +332,7 @@ function createDeployer(projectRoot, foundries, environments, environmentName,
   }
 
   function unmapOldApp(location) {
-    var foundry = newFoundry(location);
+    var foundry = getFoundry(location);
     return foundry.unmapOldApps();
   }
 
