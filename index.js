@@ -127,7 +127,7 @@ function createDeployer(projectRoot, foundrySpecs, environments,
       return cf('start', newAppName);
     }
     function deleteApp(appName) {
-      return cf('delete', '-f', '-r', appName)
+      return cf('delete', '-f', appName)
         .catch(function (error) {
           // Do not reject so that a failed app deletion doesn't cause
           // the rest of the script to fail.
